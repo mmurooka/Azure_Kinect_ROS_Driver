@@ -11,6 +11,17 @@ Licensed under the MIT License.
        to "0.05 0.05 0.05 0.05" under Map and Odom columns. -->
   <arg name="color_enabled" default="true"/> 
 
+  <arg name="database_path"           default="~/.ros/rtabmap.db"/>
+  <arg name="args"                    default=""/>              <!-- delete_db_on_start, udebug -->
+  <arg name="cell_size"               default="0.05"/>
+
+  <!-- Choose visualization -->
+  <arg name="rtabmapviz"              default="true" />
+  <arg name="rviz"                    default="false" />
+
+  <!-- Localization-only mode -->
+  <arg name="localization"            default="false"/>
+
   <param name="robot_description"
     command="xacro $(find azure_kinect_ros_driver)/urdf/azure_kinect.urdf.xacro" />
 
@@ -76,7 +87,8 @@ Licensed under the MIT License.
   </node>
   
   <!-- Start rtabmap_ros node -->
-  <include file="$(find rtabmap_ros)/launch/rtabmap.launch">
+  <!-- <include file="$(find rtabmap_ros)/launch/rtabmap.launch"> -->
+  <include file="$(find azure_kinect_ros_driver)/launch/rtabmap.launch">
     <arg     if="$(arg color_enabled)" name="rgb_topic"          value="/k4a/rgb/image_rect" />
     <arg     if="$(arg color_enabled)" name="depth_topic"        value="/k4a/depth_to_rgb/image_raw" />
     <arg     if="$(arg color_enabled)" name="camera_info_topic"  value="/k4a/rgb/camera_info" />
@@ -85,9 +97,14 @@ Licensed under the MIT License.
     <arg unless="$(arg color_enabled)" name="camera_info_topic"  value="/k4a/ir/camera_info" />
     <arg name="approx_sync" value="true" />
     <arg name="frame_id"    value="camera_base" />
-    <arg      if="$(arg color_enabled)" name="args" value="--delete_db_on_start --GFTT/MinDistance 7 --Vis/CorGuessWinSize 40 --Optimizer/GravitySigma 0.3" />
-    <arg unless ="$(arg color_enabled)" name="args" value="--delete_db_on_start --Optimizer/GravitySigma 0.3" />
+    <arg      if="$(arg color_enabled)" name="args" value="$(arg args) --Odom/ResetCountdown 2 --Rtabmap/DetectionRate 15 --GFTT/MinDistance 7 --Vis/CorGuessWinSize 40 --Optimizer/GravitySigma 0.3" />
+    <arg unless ="$(arg color_enabled)" name="args" value="$(arg args) --Optimizer/GravitySigma 0.3" />
     <arg name="wait_imu_to_init"   value="true"/>
+    <arg name="database_path" value="$(arg database_path)"/>
+    <arg name="cell_size" value="$(arg cell_size)"/>
+    <arg name="localization" value="$(arg localization)"/>
+    <arg name="rtabmapviz" value="$(arg rtabmapviz)"/>
+    <arg name="rviz" value="$(arg rviz)"/>
   </include>
 
 </launch>
